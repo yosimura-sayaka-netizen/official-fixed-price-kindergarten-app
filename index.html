@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>新制度幼稚園 公定価格計算</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">新制度幼稚園</p>
+        <h1>公定価格計算</h1>
+      </div>
+      <div class="header-actions">
+        <button class="icon-button" id="resetButton" type="button" title="初期値に戻す" aria-label="初期値に戻す">↺</button>
+        <button class="primary-button" id="exportButton" type="button">CSV出力</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="summary-band" aria-label="集計">
+        <div class="metric">
+          <span>年間合計</span>
+          <strong id="annualTotal">0</strong>
+        </div>
+        <div class="metric">
+          <span>月平均</span>
+          <strong id="monthlyAverage">0</strong>
+        </div>
+        <div class="metric">
+          <span>地域区分</span>
+          <strong id="regionMetric">未選択</strong>
+        </div>
+        <div class="metric">
+          <span>定員区分</span>
+          <strong id="capacityMetric">未入力</strong>
+        </div>
+      </section>
+
+      <section class="workspace-grid">
+        <div class="panel settings-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">施設設定</p>
+              <h2>年度・地域・定員</h2>
+            </div>
+            <span class="status-chip">幼稚園のみ</span>
+          </div>
+          <div class="form-grid">
+            <label>
+              施設名
+              <input id="facilityName" type="text" autocomplete="organization" />
+            </label>
+            <label>
+              年度
+              <select id="fiscalYear">
+                <option value="2026">令和8年度</option>
+                <option value="2027">令和9年度</option>
+                <option value="2028">令和10年度</option>
+              </select>
+            </label>
+            <label>
+              利用定員
+              <input id="capacity" type="number" min="1" value="35" />
+            </label>
+            <label>
+              都道府県
+              <select id="prefecture"></select>
+            </label>
+            <label>
+              市町村
+              <select id="municipality"></select>
+            </label>
+            <label>
+              地域区分
+              <select id="regionSelect">
+                <option value="20/100地域">20/100地域</option>
+                <option value="16/100地域">16/100地域</option>
+                <option value="15/100地域">15/100地域</option>
+                <option value="12/100地域">12/100地域</option>
+                <option value="10/100地域">10/100地域</option>
+                <option value="6/100地域">6/100地域</option>
+                <option value="3/100地域">3/100地域</option>
+                <option value="その他地域">その他地域</option>
+              </select>
+            </label>
+            <label>
+              処遇改善等加算a
+              <select id="rateA">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12" selected>12</option>
+              </select>
+            </label>
+            <label>
+              処遇改善等加算b
+              <select id="rateB">
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7" selected>7</option>
+              </select>
+            </label>
+            <label>
+              処遇改善等加算計
+              <input id="rateTotal" type="text" value="19" readonly />
+            </label>
+          </div>
+          <div class="save-toolbar" aria-label="保存">
+            <button class="primary-button" id="saveRecordButton" type="button">保存</button>
+            <select class="save-select" id="savedRecordSelect" aria-label="保存データ"></select>
+            <button class="secondary-button" id="loadRecordButton" type="button">読込</button>
+            <button class="danger-button" id="deleteRecordButton" type="button">削除</button>
+            <span class="save-status" id="saveStatus" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <div class="panel source-panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-kicker">マスタ更新</p>
+              <h2>PDF取込</h2>
+            </div>
+            <span class="status-chip muted" id="pdfStatus">未取込</span>
+          </div>
+          <div class="source-grid">
+            <label class="file-zone">
+              <span>公定価格単価表 PDF</span>
+              <input id="pricePdf" type="file" accept="application/pdf" />
+            </label>
+          </div>
+          <div class="preview-strip">
+            <figure>
+              <img src="./assets/price-table-preview.png" alt="公定価格単価表のプレビュー" />
+              <figcaption>単価表</figcaption>
+            </figure>
+          </div>
+          <ol class="update-flow">
+            <li>PDF解析</li>
+            <li>差分確認</li>
+            <li>承認反映</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="section-kicker">②人数マスタ</p>
+            <h2>月初人数・給食日数</h2>
+          </div>
+          <span class="status-chip" id="childCountTotal">0人</span>
+        </div>
+        <div class="count-table-stack" id="countTables"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="section-kicker">①単価マスタ</p>
+            <h2>加算・減算の月別適用</h2>
+          </div>
+          <div class="segmented" role="group" aria-label="表示切替">
+            <button type="button" class="active" data-filter="all">全て</button>
+            <button type="button" data-filter="auto">自動</button>
+            <button type="button" data-filter="manual">要設定</button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="apply-table" id="applyTable"></table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="section-kicker">③年間合計</p>
+            <h2>計算結果</h2>
+          </div>
+          <span class="status-chip success" id="autoCoverage">自動計算 0件</span>
+        </div>
+        <div class="table-scroll">
+          <table class="result-table" id="resultTable"></table>
+        </div>
+      </section>
+    </main>
+
+    <script src="./region-data.js"></script>
+    <script src="./addition-unit-data.js"></script>
+    <script src="./capacity-over-data.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
