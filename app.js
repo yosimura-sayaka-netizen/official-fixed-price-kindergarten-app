@@ -1,4 +1,4 @@
-const months = [
+﻿const months = [
   { key: "apr", label: "4月" },
   { key: "may", label: "5月" },
   { key: "jun", label: "6月" },
@@ -2946,9 +2946,8 @@ function renderFiscalYears() {
   if (!elements.fiscalYear) return;
   elements.fiscalYear.innerHTML = [
     { value: "2026", label: "令和8年度" },
-    { value: "2027", label: "令和9年度" },
-    { value: "2028", label: "令和10年度" },
   ].map((entry) => `<option value="${entry.value}">${entry.label}</option>`).join("");
+  elements.fiscalYear.value = "2026";
 }
 
 function renderRegionOptions() {
